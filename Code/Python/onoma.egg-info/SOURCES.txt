@@ -1,0 +1,7 @@
+setup.py
+onoma/onoma_database.py
+onoma/person_name.py
+onoma.egg-info/PKG-INFO
+onoma.egg-info/SOURCES.txt
+onoma.egg-info/dependency_links.txt
+onoma.egg-info/top_level.txt

@@ -2,7 +2,7 @@ from typing import Optional
 import sqlite3
 from sqlite3 import Error
 
-from person_name import PersonName
+from onoma.person_name import PersonName
 
 
 class OnomaDatabase:
@@ -173,6 +173,34 @@ class OnomaDatabase:
 
         return result
 
+    def insert_name(self, person_name: PersonName):
+        sql = f"INSERT INTO {self._table_name} VALUES (null, ?, ?, ?, ?, ?, ?)"
+
+        self._connection.execute(sql,
+                                 (person_name.culture,
+                                  person_name.component,
+                                  person_name.gender,
+                                  person_name.alphabetic,
+                                  person_name.ideographic,
+                                  person_name.phonetic))
+        self._connection.commit()
+
+    def insert_names(self, person_names: list[PersonName]) -> None:
+        cursor = self._connection.cursor()
+        cursor.execute("begin")
+
+        for person_name in person_names:
+            sql = f"INSERT INTO {self._table_name} VALUES (null, ?, ?, ?, ?, ?, ?)"
+            self._connection.execute(sql,
+                                 (person_name.culture,
+                                  person_name.component,
+                                  person_name.gender,
+                                  person_name.alphabetic,
+                                  person_name.ideographic,
+                                  person_name.phonetic))
+
+        self._connection.commit()
+
     # region Protected Auxiliary
     def _create_tables(self) -> bool:
         """
@@ -221,31 +249,13 @@ class OnomaDatabase:
 
 
 if __name__ == '__main__':
-    database_path = "../../Data/onoma.db3"
+    database_path = "onoma_test.db3"
 
     db = OnomaDatabase()
     db.open(database_path)
 
-    cultures = db.supported_cultures()
+    person_names = [PersonName(culture='PL', gender='F', component='given', alphabetic='Agnieszka'),
+                    PersonName(culture='PL', gender='F', component='given', alphabetic='Jadwiga')]
 
-    print(cultures)
+    db.insert_names(person_names)
 
-    id = 100
-    name = db.select_name(id)
-
-    print(name)
-
-    pattern = "urs"
-    limit = 60
-
-    names = db.select_names(pattern, '', '', 'family', limit)
-
-    for name in names:
-        print(name)
-
-    names = db.select_names_random(20, ['HE', 'FR'], '', 'family')
-
-    print("--------------------------\n\n")
-
-    for name in names:
-        print(name)
